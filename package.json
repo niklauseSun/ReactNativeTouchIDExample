@@ -7,8 +7,14 @@
     "test": "jest"
   },
   "dependencies": {
+    "antd-mobile": "^2.1.6",
+    "babel-plugin-import": "^1.6.6",
     "react": "^16.3.0-alpha.1",
-    "react-native": "0.54.1"
+    "react-app-rewired": "^1.5.0",
+    "react-native": "0.54.1",
+    "react-native-router-flux": "^4.0.0-beta.28",
+    "react-native-storage": "^0.2.2",
+    "react-native-touch-id": "^4.0.1"
   },
   "devDependencies": {
     "babel-jest": "22.4.1",
@@ -18,5 +24,9 @@
   },
   "jest": {
     "preset": "react-native"
-  }
+  },
+  "main": "index.js",
+  "repository": "https://github.com/Niklause/ReactNativeTouchIDExample.git",
+  "author": "Niklause <565974029@qq.com>",
+  "license": "MIT"
 }

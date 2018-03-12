@@ -14,8 +14,6 @@ import {
 
 import { Button, Toast,WhiteSpace } from 'antd-mobile'
 
-import {Actions as NavigationActions} from 'react-native-router-flux'
-
 import TouchID from 'react-native-touch-id'
 
 import MyStorage from './MyStorage'
@@ -58,9 +56,11 @@ function setStorage() {
   user.userid = "12222";
   user.token = "myToken";
   MyStorage._save3("user3",user);
+  Toast.info('save success');
 }
 
 function getStorage() {
+  Toast.info('get success');
   MyStorage._load("user3", function(data) {
     console.log("---- data ----", data);
   });
@@ -68,20 +68,20 @@ function getStorage() {
 
 function showToast() {
 
-  // if (TouchID.isSupported()) {
-  //   Toast.info('this is a click');
-  //   console.log('device is support');
-  // } else {
-  //   Toast.info('current device is not support')
-  // }
-  TouchID.authenticate('to demo this react-native component')
-  .then(success => {
-    // Success code
-  })
-  .catch(error => {
-    // Failure code
-    Toast.info(error.message)
-  });
+  if (TouchID.isSupported()) {
+    Toast.info('this is a click');
+    console.log('device is support');
+  } else {
+    Toast.info('current device is not support')
+  }
+  // TouchID.authenticate('to demo this react-native component')
+  // .then(success => {
+  //   // Success code
+  // })
+  // .catch(error => {
+  //   // Failure code
+  //   Toast.info(error.message)
+  // });
 }
 
 // 需要的方法
