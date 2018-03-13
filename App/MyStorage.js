@@ -1,8 +1,7 @@
-import React, { Component } from 'react';
 import Storage from 'react-native-storage';
 
 import {
-  View,AsyncStorage
+  AsyncStorage
 } from 'react-native';
 
 import SYNC from './sync';
@@ -11,7 +10,7 @@ var storage;
 var defaultExpires = 1000*3600*24;
 var size = 1000;
 
-export default class MyStorage extends Component {
+export default class MyStorage {
   static _getStorage() {
     if (storage==undefined) {
       storage = new Storage({
@@ -74,6 +73,7 @@ export default class MyStorage extends Component {
       return ret;
     }).catch(err => {
       console.warn(err.message);
+      callBack(err.name)
       switch (err.name) {
         case 'NotFoundError':
           // TODO
@@ -82,7 +82,6 @@ export default class MyStorage extends Component {
           // TODO
           break;
         default:
-
       }
     });
   }

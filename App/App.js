@@ -12,11 +12,11 @@ import {
   View
 } from 'react-native';
 
-import { Button, Toast,WhiteSpace } from 'antd-mobile'
+import { Button, Toast,WhiteSpace,Model } from 'antd-mobile'
 
 import TouchID from 'react-native-touch-id'
-
 import MyStorage from './MyStorage'
+
 
 const instructions = Platform.select({
   ios: 'Press Cmd+R to reload,\n' +
@@ -40,31 +40,116 @@ export default class App extends Component<Props> {
           Welcome to React Native!
         </Text>
         <Button onClick={showToast}>Learn more 点击</Button>
-        <WhiteSpace/>
-        <Button onClick={setStorage}>设置</Button>
-        <WhiteSpace/>
-        <Button onClick={getStorage}>验证</Button>
+        <WhiteSpace />
+        <Button onClick={setTouchID}>设置</Button>
+        <WhiteSpace />
+        <Button onClick={loginVerify}>验证登录</Button>
+        <WhiteSpace />
+        <Button onClick={verifyTouchID}>验证</Button>
         <WhiteSpace />
       </View>
     );
   }
 }
 
-function setStorage() {
-  var user = new Object();
-  user.from = "我来自中国";
-  user.userid = "12222";
-  user.token = "myToken";
-  MyStorage._save3("user3",user);
-  Toast.info('save success');
-}
-
-function getStorage() {
-  Toast.info('get success');
-  MyStorage._load("user3", function(data) {
-    console.log("---- data ----", data);
+function setTouchID() {
+  MyStorage._load("TouchIDStatus", (ret) => {
+    if (touchIDSetStatus !== 'true') {
+      // 未被设置
+      if (TouchID.isSupported()) {
+        console.log('current device is support');
+        TouchID.isSupported().then(biometryType => {
+          if (biometryType === 'TouchID') {
+            TouchID.authenticate('设置TouchID')
+            .then(success => {
+              // 验证成功
+              MyStorage._save3("TouchIDStatus","true")
+              Toast.info('设置成功');
+            }).catch(err => {
+              TouchID.info('当前设备不支持TouchID');
+            })
+          }
+        })
+      } else {
+        TouchID.info('当前设备不支持TouchID');
+      }
+    } else {
+      Toast.info('当前设备已经设置TouchID');
+    }
   });
 }
+
+function verifyTouchID() {
+  MyStorage._load("TouchIDStatus", (ret) => {
+    if (ret === "true") {
+      TouchID.authenticate('验证TouchID')
+      .then(success => {
+        Toast.info('验证成功');
+        // TODO login module
+      }).catch(err => {
+        console.log(err.name);
+        switch (err.name) {
+          case 'LAErrorAuthenticationFailed':
+            Toast.info('验证失败');
+            break;
+          case 'RCTTouchIDNotSupported':
+            Toast.info('多次验证失败，TouchID已经被锁定');
+            break;
+          case 'RCTTouchIDUnknownError':
+            Toast.info('多次验证失败，请前往配置重新设置TouchID')
+            break;
+          default:
+            break;
+        }
+      });
+    }
+  });
+}
+
+function loginVerify() {
+  MyStorage._load("TouchIDStatus", (ret) => {
+    if (ret === "true") {
+      TouchID.authenticate('验证TouchID')
+      .then(success => {
+        Toast.info('验证成功');
+        // TODO login module
+      }).catch(err => {
+        console.log(err.name);
+        switch (err.name) {
+          case 'LAErrorAuthenticationFailed':
+            Toast.info('验证失败');
+            break;
+          case 'RCTTouchIDNotSupported':
+            Toast.info('多次验证失败，TouchID已经被锁定');
+            break;
+          case 'RCTTouchIDUnknownError':
+            Toast.info('多次验证失败，请前往配置重新设置TouchID')
+            break;
+          default:
+
+        }
+      });
+    }
+  });
+}
+
+// function authenticate(msg, callBack) {
+//   TouchID.authenticate(msg).then(success => {
+//     callBack(success, nil);
+//   }).catch(err => {
+//     callBack(false, err);
+//     switch (err.name) {
+//       case 'LAErrorAuthenticationFailed':
+//         Toast.info('验证失败');
+//         break;
+//       case 'LAErrorTouchIDNotAvailable':
+//         Toast.info('多次验证失败，请前往配置重新设置TouchID');
+//         break;
+//       default:
+//
+//     }
+//   });
+// }
 
 function showToast() {
 
@@ -74,14 +159,10 @@ function showToast() {
   } else {
     Toast.info('current device is not support')
   }
-  // TouchID.authenticate('to demo this react-native component')
-  // .then(success => {
-  //   // Success code
-  // })
-  // .catch(error => {
-  //   // Failure code
-  //   Toast.info(error.message)
-  // });
+}
+
+function setTouchIDStatus(flag) {
+  MyStorage._save3("TouchIDStatus",flag);
 }
 
 // 需要的方法
