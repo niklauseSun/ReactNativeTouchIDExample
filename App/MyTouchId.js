@@ -1,37 +1,31 @@
+import React, { Component } from 'react'
+
 import TouchID from 'react-native-touch-id'
 
-export default class MyTouchId {
-  static _isSupport() {
-    if (TouchID.isSupported()) {
-      return true;
-    }
-    return false
-  }
+import { Toast } from 'antd-mobile'
 
-  static _supportType() {
-    TouchID.isSupported().then(biometryType => {
-      // success code
-      if (biometryType === 'FaceID') {
-        console.log('FaceID is supported');
-        return 'FaceID';
-      } else {
-        console.log('TouchID is supported');
-        return 'TouchID';
-      }
-    }).catch(error => {
-      // faile code
-      console.log(error);
-    });
-  }
+export default class MyTouchId extends Component {
 
-  static _authenticate() {
-    TouchID.authenticate('to demo this react-native component').then(success => {
+  static _authenticate(msg,callBack) {
+    TouchID.authenticate(msg).then(success => {
       // 验证成功
-      // TODO
-      return true;
+      Toast.info('验证成功')
+      callBack(success,nil)
     }).catch(err => {
-      // TODO
-      return err.message;
+      switch(err.name) {
+        case 'LAErrorAuthenticationFailed':
+          Toast.info('验证失败');
+          break;
+        case 'RCTTouchIDNotSupported':
+          Toast.info('多次验证失败，TouchID已经被锁定');
+          break;
+        case 'RCTTouchIDUnknownError':
+          Toast.info('多次验证失败，请前往配置重新设置TouchID')
+          break;
+        default:
+          break;
+      }
+      callBack(false,err.name);
     });
   }
 }

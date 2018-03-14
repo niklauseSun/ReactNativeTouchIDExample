@@ -16,6 +16,7 @@ import { Button, Toast,WhiteSpace,Model } from 'antd-mobile'
 
 import TouchID from 'react-native-touch-id'
 import MyStorage from './MyStorage'
+import MyTouchId from './MyTouchId'
 
 
 const instructions = Platform.select({
@@ -25,11 +26,10 @@ const instructions = Platform.select({
     'Shake or press menu button for dev menu',
 });
 
-type Props = {};
 
 MyStorage._getStorage();
 
-export default class App extends Component<Props> {
+export default class App extends Component<> {
   constructor() {
     super()
   }
@@ -54,19 +54,17 @@ export default class App extends Component<Props> {
 
 function setTouchID() {
   MyStorage._load("TouchIDStatus", (ret) => {
-    if (touchIDSetStatus !== 'true') {
+    if (ret !== 'true') {
       // 未被设置
       if (TouchID.isSupported()) {
         console.log('current device is support');
         TouchID.isSupported().then(biometryType => {
           if (biometryType === 'TouchID') {
-            TouchID.authenticate('设置TouchID')
-            .then(success => {
-              // 验证成功
-              MyStorage._save3("TouchIDStatus","true")
-              Toast.info('设置成功');
-            }).catch(err => {
-              TouchID.info('当前设备不支持TouchID');
+            MyTouchId._authenticate('设置TouchID', (flag,msg) => {
+              console.log('flag',flag);
+              if (flag) {
+                MyStorage._save3("TouchIDStatus","true")
+              }
             })
           }
         })
@@ -82,26 +80,7 @@ function setTouchID() {
 function verifyTouchID() {
   MyStorage._load("TouchIDStatus", (ret) => {
     if (ret === "true") {
-      TouchID.authenticate('验证TouchID')
-      .then(success => {
-        Toast.info('验证成功');
-        // TODO login module
-      }).catch(err => {
-        console.log(err.name);
-        switch (err.name) {
-          case 'LAErrorAuthenticationFailed':
-            Toast.info('验证失败');
-            break;
-          case 'RCTTouchIDNotSupported':
-            Toast.info('多次验证失败，TouchID已经被锁定');
-            break;
-          case 'RCTTouchIDUnknownError':
-            Toast.info('多次验证失败，请前往配置重新设置TouchID')
-            break;
-          default:
-            break;
-        }
-      });
+      MyTouchId._authenticate('验证TouchID')
     }
   });
 }
@@ -109,26 +88,12 @@ function verifyTouchID() {
 function loginVerify() {
   MyStorage._load("TouchIDStatus", (ret) => {
     if (ret === "true") {
-      TouchID.authenticate('验证TouchID')
-      .then(success => {
-        Toast.info('验证成功');
-        // TODO login module
-      }).catch(err => {
-        console.log(err.name);
-        switch (err.name) {
-          case 'LAErrorAuthenticationFailed':
-            Toast.info('验证失败');
-            break;
-          case 'RCTTouchIDNotSupported':
-            Toast.info('多次验证失败，TouchID已经被锁定');
-            break;
-          case 'RCTTouchIDUnknownError':
-            Toast.info('多次验证失败，请前往配置重新设置TouchID')
-            break;
-          default:
-
+      MyTouchId._authenticate('验证TouchID', (flag,msg) => {
+        console.log('flag',flag);
+        if (flag) {
+          // login module
         }
-      });
+      })
     }
   });
 }
@@ -152,7 +117,6 @@ function loginVerify() {
 // }
 
 function showToast() {
-
   if (TouchID.isSupported()) {
     Toast.info('this is a click');
     console.log('device is support');
